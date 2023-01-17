@@ -5,7 +5,12 @@ import { validateRequest } from "../middlewares/validateRequest";
 
 const router = express.Router();
 
-router.route("/login").post(login);
+router.route("/login").post(
+  body("email").isEmail().withMessage("You must provide a valid email"),
+
+  validateRequest,
+  login
+);
 
 router
   .route("/register")

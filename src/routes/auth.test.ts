@@ -69,3 +69,42 @@ describe("register endpoint", () => {
     expect(user?.passwordConfirm).toBeUndefined();
   });
 });
+
+describe("login endpoint", () => {
+  it("returns 400 if email is invalid", async () => {
+    await request(app).post("/api/v1/auth/login").send({
+      email: "test",
+      password: "test",
+    });
+  });
+  it("returns 401 if user does not exits", async () => {
+    await request(app)
+      .post("/api/v1/auth/login")
+      .send(validUserCredentials)
+      .expect(401);
+  });
+  it("returns 401 if password is incorrect", async () => {
+    await request(app).post("/api/v1/auth/register").send(validUserCredentials);
+    await request(app)
+      .post("/api/v1/auth/login")
+      .send({
+        email: validUserCredentials.email,
+        password: "test123",
+      })
+      .expect(401);
+  });
+  it("returns 200 if valid credentials were provided", async () => {
+    await request(app).post("/api/v1/auth/register").send(validUserCredentials);
+    await request(app)
+      .post("/api/v1/auth/login")
+      .send(validUserCredentials)
+      .expect(200);
+  });
+  it("sets a cookie after successful login", async () => {
+    await request(app).post("/api/v1/auth/register").send(validUserCredentials);
+    const response = await request(app)
+      .post("/api/v1/auth/login")
+      .send(validUserCredentials);
+    expect(response.get("Set-Cookie")).toBeDefined();
+  });
+});

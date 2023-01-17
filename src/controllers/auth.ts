@@ -2,9 +2,39 @@ import { NextFunction, Request, Response } from "express";
 import { AuthenticationError } from "../errors/AuthenticationError";
 import { User } from "../models/user";
 import jwt from "jsonwebtoken";
+import { Password } from "../services/Password";
 
-export const login = async (req: Request, res: Response) => {
-  res.send("login");
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (
+      !existingUser ||
+      !(await Password.compare(existingUser.password, password))
+    ) {
+      throw new AuthenticationError("Invalid credentials");
+    }
+
+    const userJwt = jwt.sign(
+      {
+        id: existingUser.id,
+        email: existingUser.email,
+      },
+      process.env.JWT_KEY!
+    );
+
+    req.session = {
+      jwt: userJwt,
+    };
+
+    res.status(200).send(existingUser);
+  } catch (error: any) {
+    next(error);
+  }
 };
 
 export const register = async (
