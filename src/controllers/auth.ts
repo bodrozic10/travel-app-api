@@ -75,11 +75,3 @@ export const logout = async (req: Request, res: Response) => {
   req.session = null;
   res.send({});
 };
-
-export const currentUser = async (req: Request, res: Response) => {
-  if (req.session?.jwt) {
-    res.send("currentUser");
-  } else {
-    res.send({});
-  }
-};
