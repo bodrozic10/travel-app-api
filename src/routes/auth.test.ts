@@ -9,6 +9,10 @@ const validUserCredentials = {
   passwordConfirm: "test1234",
 };
 
+const clearedCookie = [
+  "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly",
+];
+
 describe("register endpoint", () => {
   it("returns 400 if email is invalid", async () => {
     const response = await request(app).post("/api/v1/auth/register").send({
@@ -106,5 +110,13 @@ describe("login endpoint", () => {
       .post("/api/v1/auth/login")
       .send(validUserCredentials);
     expect(response.get("Set-Cookie")).toBeDefined();
+  });
+});
+
+describe("logout endpoint", () => {
+  it("clears the cookie after logout", async () => {
+    await request(app).post("/api/v1/auth/register").send(validUserCredentials);
+    const response = await request(app).post("/api/v1/auth/logout").send({});
+    expect(response.get("Set-Cookie")).toEqual(clearedCookie);
   });
 });
