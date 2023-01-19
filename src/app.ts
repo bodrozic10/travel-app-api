@@ -1,5 +1,6 @@
 import express from "express";
 import authRouter from "./routes/auth";
+import accommodationRouter from "./routes/accommodations";
 import { errorMiddleware } from "./middlewares/error";
 import cookieSession from "cookie-session";
 
@@ -14,6 +15,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/accommodations", accommodationRouter);
 
 app.use(errorMiddleware);
 
